@@ -15,14 +15,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf.urls import url, include
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, AbstractUser
 from rest_framework import routers, serializers, viewsets
 from bookmarks.views import BookmarkViewSet
+from bookmarks.models import Bookmark
+from localusers.models import LocalUser
+
+
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    bookmarks  = serializers.PrimaryKeyRelatedField(many=True, queryset=Bookmark.objects.all())
     class Meta:
-        model = User
-        fields = ['url', 'username', 'email', 'is_staff']
+        model = LocalUser
+        fields = ['url', 'username', 'email', 'is_staff', 'bookmarks']
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -31,7 +36,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 # ViewSets define the view behavior.
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = LocalUser.objects.all()
     serializer_class = UserSerializer
 
 class GroupViewSet(viewsets.ModelViewSet):
